@@ -15,6 +15,9 @@ sys.path.append("/home/mil/kanayama/workspace/chainercv/chainercv/visualizations
 from vis_bbox import vis_bbox
 import cupy
 
+from PIL import Image
+import numpy as np
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', type=int, default=-1)
@@ -38,17 +41,21 @@ def main():
         filename = filename.split('\n')[0]
         print(filename)
         #img = utils.read_image(args.root_path + filename, color=True)
-        img = utils.read_image(args.image, color=True)
-        import pdb; pdb.set_trace()
+        #img = utils.read_image(args.image, color=True)
+        #img = Image.open(args.image)
+        img = Image.open(args.root_path + filename)
+        img = img.resize((256, 256)) # なぜか、ある特定の形のときエラーになる
+        img = np.asarray(img, dtype=np.float32)
+        img = np.transpose(img, (2, 0, 1))
         bboxes, labels, scores = model.predict([img])
         bbox, label, score = bboxes[0], labels[0], scores[0]
 
         vis_bbox(
             img, bbox, label, score, label_names=voc_bbox_label_names)
         #plot.show()
-        plot.savefig(args.dst_path + args.image.split("/")[-1])
-        break
-        #plot.savefig(args.dst_path + filename)
+        #plot.savefig(args.dst_path + args.image.split("/")[-1])
+        #break
+        plot.savefig(args.dst_path + filename)
 
     image_list.close()
 
